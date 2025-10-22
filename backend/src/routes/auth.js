@@ -9,7 +9,7 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // Successful authentication, redirect to frontend
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3001'}/auth/success`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3101'}/auth/success`);
   }
 );
 
@@ -17,7 +17,7 @@ router.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) { return next(err); }
     req.session.destroy();
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3001'}`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3101'}`);
   });
 });
 
