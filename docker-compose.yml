@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pomodoro-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - FRONTEND_URL=http://localhost:3101
+      - BACKEND_URL=http://localhost:3100
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - STUDY_CALENDAR_ID=${STUDY_CALENDAR_ID}
+      - WEKAN_URL=${WEKAN_URL}
+      - WEKAN_API_TOKEN=${WEKAN_API_TOKEN}
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - pomodoro-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pomodoro-frontend
+    restart: unless-stopped
+    ports:
+      - "3101:80"
+    depends_on:
+      - backend
+    networks:
+      - pomodoro-network
+
+networks:
+  pomodoro-network:
+    driver: bridge
+
+volumes:
+  backend-data:
