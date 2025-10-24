@@ -124,6 +124,7 @@ const PomodoroTimer = ({ user }) => {
   };
 
   const handlePause = () => {
+    // Solo pausa la sesión, no la resetea
     fetch('/api/pomodoro/pause', {
       method: 'POST',
       credentials: 'include'
@@ -198,8 +199,8 @@ const PomodoroTimer = ({ user }) => {
           </Typography>
         </Toolbar>
       </AppBar>
-    
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 500, mb: 3 }}>
+
+      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 500, mt: 2, mb: 3 }}>
         <Typography variant="h4" align="center" gutterBottom>
           {session.isBreak ? 'Descanso' : 'Tiempo de Concentración'}
         </Typography>

@@ -188,7 +188,7 @@ const WekanIntegration = ({ user }) => {
             variant="outlined"
             value={config.wekanUrl}
             onChange={handleConfigChange}
-            helperText="Ej: https://wekan.infociber.cl"
+            helperText="Ej: https://wekan.example.com"
             sx={{ mb: 2 }}
           />
           <TextField
