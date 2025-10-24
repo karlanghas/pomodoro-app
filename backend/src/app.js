@@ -27,7 +27,7 @@ app.use(session({
   saveUninitialized: false,
   proxy: true, // Confía en el proxy inverso (Nginx)
   cookie: {
-    domain: 'pomodoro.infociber.cl', // <-- ¡CLAVE! Define explícitamente el dominio
+    domain: '.pomodoro.infociber.cl', // <-- ¡CLAVE! Define explícitamente el dominio
     path: '/', // La cookie es válida para todo el sitio
     secure: true, // Solo por HTTPS
     httpOnly: true, // No accesible por JavaScript
