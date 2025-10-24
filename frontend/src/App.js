@@ -32,40 +32,55 @@ function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 1. Revisa si hay un token en la URL (después del login)
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
+useEffect(() => {
+  console.log("App useEffect running...");
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('token');
 
-    if (tokenFromUrl) {
-      // Si hay un token, guárdalo en localStorage
-      localStorage.setItem('pomodoroToken', tokenFromUrl);
-      // Limpia la URL para que no se vea el token
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+  if (tokenFromUrl) {
+    console.log("Token found in URL:", tokenFromUrl);
+    localStorage.setItem('pomodoroToken', tokenFromUrl);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 
-    // 2. Obtiene el token del almacenamiento local
-    const token = localStorage.getItem('pomodoroToken');
+  const token = localStorage.getItem('pomodoroToken');
+  console.log("Token from localStorage:", token);
 
-    if (token) {
-      // Si hay un token, verifica su validez con el backend
-      fetch('/api/auth/verify-token', {
-        headers: { 'Authorization': `Bearer ${token}` }
+  if (token) {
+    console.log("Token exists, verifying with backend...");
+    fetch('/api/auth/verify-token', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => {
+        console.log("Verify token response status:", res.status);
+        if (!res.ok) {
+          throw new Error(`Token verification failed: ${res.statusText}`);
+        }
+        return res.json();
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.user) {
-            setUser(data.user);
-          } else {
-            localStorage.removeItem('pomodoroToken'); // Token inválido
-          }
-        })
-        .catch(err => console.error('Error verifying token:', err))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, []);
+      .then(data => {
+        console.log("Verify token response data:", data);
+        if (data.user) {
+          console.log("User data found, setting user state.");
+          setUser(data.user);
+        } else {
+          console.log("No user in response, clearing token.");
+          localStorage.removeItem('pomodoroToken');
+        }
+      })
+      .catch(err => {
+        console.error('Error verifying token:', err);
+        localStorage.removeItem('pomodoroToken');
+      })
+      .finally(() => {
+        console.log("Finished token verification process.");
+        setLoading(false);
+      });
+  } else {
+    console.log("No token found, setting loading to false.");
+    setLoading(false);
+  }
+}, []);
 
   const handleLogout = () => {
     localStorage.removeItem('pomodoroToken');
