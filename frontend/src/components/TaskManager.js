@@ -21,8 +21,11 @@ import {
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const TaskManager = ({ user }) => {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -188,6 +191,17 @@ const TaskManager = ({ user }) => {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <AppBar position="static" color="primary" enableColorOnDark>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Gestión de Tareas
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
       <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4">Gestión de Tareas</Typography>

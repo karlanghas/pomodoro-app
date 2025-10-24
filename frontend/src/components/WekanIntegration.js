@@ -14,67 +14,57 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip
+  IconButton,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
-import { ExpandMore as ExpandMoreIcon, Dashboard as DashboardIcon, Sync as SyncIcon } from '@mui/icons-material';
+import { ArrowBack as ArrowBackIcon, ExpandMore as ExpandMoreIcon, Dashboard as DashboardIcon, Sync as SyncIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import apiRequest from '../services/api'; // Usaremos el helper de API
 
 const WekanIntegration = ({ user }) => {
+  const navigate = useNavigate();
   const [boards, setBoards] = useState([]);
   const [cards, setCards] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [wekanUrl, setWekanUrl] = useState('');
-  const [apiToken, setApiToken] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
+  
+  // Estado para la configuración, leída de localStorage
+  const [config, setConfig] = useState({
+    wekanUrl: localStorage.getItem('wekanUrl') || '',
+    apiToken: localStorage.getItem('wekanApiToken') || '',
+  });
 
   useEffect(() => {
-    fetchBoards();
+    // Solo sincronizar si hay configuración guardada
+    if (config.wekanUrl && config.apiToken) {
+      fetchBoards();
+    }
   }, []);
 
-  const fetchBoards = () => {
+  const fetchBoards = async () => {
+    if (!config.wekanUrl || !config.apiToken) {
+      setError('Por favor, configura la URL y el token de API de Wekan.');
+      return;
+    }
+    
     setLoading(true);
     setError('');
     
-    fetch('/api/wekan/boards', { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error('Error al obtener tableros');
-        return res.json();
-      })
-      .then(data => {
-        setBoards(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching Wekan boards:', err);
-        setError('Error al obtener tableros de Wekan. Verifica la configuración.');
-        setLoading(false);
+    try {
+      // La petición ahora incluye la configuración en el cuerpo
+      const data = await apiRequest('/wekan/boards', {
+        method: 'POST',
+        body: JSON.stringify(config)
       });
-  };
-
-  const fetchCards = (boardId) => {
-    setLoading(true);
-    setError('');
-    
-    fetch(`/api/wekan/boards/${boardId}/cards`, { credentials: 'include' })
-      .then(res => {
-        if (!res.ok) throw new Error('Error al obtener tarjetas');
-        return res.json();
-      })
-      .then(data => {
-        setCards(prev => ({
-          ...prev,
-          [boardId]: data
-        }));
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Error fetching Wekan cards:', err);
-        setError('Error al obtener tarjetas de Wekan');
-        setLoading(false);
-      });
+      setBoards(data);
+    } catch (err) {
+      console.error('Error fetching Wekan boards:', err);
+      setError('Error al obtener tableros de Wekan. Verifica la configuración.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenDialog = () => {
@@ -86,10 +76,17 @@ const WekanIntegration = ({ user }) => {
   };
 
   const handleSaveConfig = () => {
-    // In a real app, this would save the configuration to the user's profile
-    // For simplicity, we'll just use it for this session
+    // Guardar en localStorage
+    localStorage.setItem('wekanUrl', config.wekanUrl);
+    localStorage.setItem('wekanApiToken', config.apiToken);
     setOpenDialog(false);
+    // Sincronizar automáticamente después de guardar
     fetchBoards();
+  };
+
+  const handleConfigChange = (e) => {
+    const { name, value } = e.target;
+    setConfig(prev => ({ ...prev, [name]: value }));
   };
 
   const handleBoardExpand = (boardId) => {
@@ -98,9 +95,38 @@ const WekanIntegration = ({ user }) => {
     }
   };
 
+  const fetchCards = async (boardId) => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const data = await apiRequest(`/wekan/boards/${boardId}/cards`, {
+        method: 'POST',
+        body: JSON.stringify(config)
+      });
+      setCards(prev => ({ ...prev, [boardId]: data }));
+    } catch (err) {
+      console.error('Error fetching Wekan cards:', err);
+      setError('Error al obtener tarjetas de Wekan.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
+      <AppBar position="static" color="primary" enableColorOnDark>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Integración con Wekan
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4">Integración con Wekan</Typography>
           <Box>
@@ -136,56 +162,11 @@ const WekanIntegration = ({ user }) => {
             ) : (
               <Box>
                 {boards.map(board => (
-                  <Accordion key={board._id} onChange={() => handleBoardExpand(board._id)}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <DashboardIcon sx={{ mr: 2, color: 'primary.main' }} />
-                        <Typography variant="h6">{board.title}</Typography>
-                      </Box>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      {cards[board._id] ? (
-                        <List>
-                          {cards[board._id].map(card => (
-                            <ListItem key={card._id} sx={{ border: '1px solid', borderColor: 'grey.300', borderRadius: 1, mb: 1 }}>
-                              <ListItemText
-                                primary={card.title}
-                                secondary={
-                                  <>
-                                    {card.description && (
-                                      <Typography variant="body2" component="div" sx={{ mt: 1 }}>
-                                        {card.description}
-                                      </Typography>
-                                    )}
-                                    {card.labels && card.labels.length > 0 && (
-                                      <Box sx={{ mt: 1 }}>
-                                        {card.labels.map(label => (
-                                          <Chip
-                                            key={label._id}
-                                            label={label.name}
-                                            size="small"
-                                            sx={{
-                                              mr: 1,
-                                              bgcolor: label.color,
-                                              color: 'white'
-                                            }}
-                                          />
-                                        ))}
-                                      </Box>
-                                    )}
-                                  </>
-                                }
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      ) : (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                          <CircularProgress size={24} />
-                        </Box>
-                      )}
-                    </AccordionDetails>
-                  </Accordion>
+                  <ListItem key={board._id} sx={{ border: '1px solid', borderColor: 'grey.300', borderRadius: 1, mb: 1, p: 2 }}>
+                    <ListItemText
+                      primary={board.title}
+                    />
+                  </ListItem>
                 ))}
               </Box>
             )}
@@ -200,24 +181,26 @@ const WekanIntegration = ({ user }) => {
             autoFocus
             margin="dense"
             id="wekanUrl"
+            name="wekanUrl"
             label="URL de Wekan"
             type="url"
             fullWidth
             variant="outlined"
-            value={wekanUrl}
-            onChange={(e) => setWekanUrl(e.target.value)}
+            value={config.wekanUrl}
+            onChange={handleConfigChange}
             helperText="Ej: https://wekan.infociber.cl"
             sx={{ mb: 2 }}
           />
           <TextField
             margin="dense"
             id="apiToken"
+            name="apiToken"
             label="Token de API"
             type="text"
             fullWidth
             variant="outlined"
-            value={apiToken}
-            onChange={(e) => setApiToken(e.target.value)}
+            value={config.apiToken}
+            onChange={handleConfigChange}
             helperText="Token de API de Wekan para autenticación"
           />
         </DialogContent>
