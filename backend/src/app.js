@@ -21,6 +21,8 @@ app.use(cors({
   credentials: true // <-- ¡MUY IMPORTANTE! Permite el envío de cookies
 }));
 app.use(express.json());
+// Vieja version
+/*
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
@@ -33,6 +35,20 @@ app.use(session({
     httpOnly: true, // No accesible por JavaScript
     sameSite: 'none', // <-- ¡CAMBIO IMPORTANTE! Requerido para cross-site con proxy
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
+  }
+}));
+*/
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: true, // <-- CAMBIO: Guarda sesiones vacías para depurar
+  proxy: true,
+  cookie: {
+    secure: true, // Mantenemos esto, es crucial para HTTPS
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+    // Hemos quitado 'domain' y 'sameSite' temporalmente
   }
 }));
 
