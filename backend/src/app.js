@@ -37,7 +37,7 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
-*/
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
@@ -51,11 +51,23 @@ app.use(session({
     // Hemos quitado 'domain' y 'sameSite' temporalmente
   }
 }));
+*/
 
 // Passport configuration
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
+passport.use(new GoogleStrategy({
+  // ... tu configuración de Google Strategy
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: `${process.env.PUBLIC_URL}/auth/google/callback`
+}, (accessToken, refreshToken, profile, done) => {
+  // ... tu lógica
+  return done(null, { profile, accessToken, refreshToken });
+}));
+
+/*
 passport.serializeUser((user, done) => {
   done(null, user);
 });
@@ -63,6 +75,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
+*/
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
