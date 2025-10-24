@@ -13,11 +13,11 @@ const taskRoutes = require('./routes/tasks');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3100;
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3101',
   credentials: true
 }));
 app.use(express.json());
@@ -43,7 +43,7 @@ passport.deserializeUser((user, done) => {
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${process.env.BACKEND_URL || 'http://localhost:3000'}/auth/google/callback`
+  callbackURL: `${process.env.PUBLIC_URL}/auth/google/callback`
 },
 (accessToken, refreshToken, profile, done) => {
   // Save user profile to session
