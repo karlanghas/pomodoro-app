@@ -16,6 +16,7 @@ router.get('/google/callback',
 */
 
 // NUEVA VERSIÓN (más robusta)
+// NUEVA VERSIÓN (con guardado explícito)
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', (err, user, info) => {
     if (err) {
@@ -27,19 +28,25 @@ router.get('/google/callback', (req, res, next) => {
       return res.redirect(`${process.env.FRONTEND_URL}/login`);
     }
     
-    // Este es el paso clave: iniciar la sesión manualmente
     req.logIn(user, (err) => {
       if (err) {
         console.error('Error al iniciar sesión (req.logIn):', err);
         return next(err);
       }
       
-      // ¡Éxito! La sesión debería estar establecida.
       console.log('Sesión iniciada correctamente para el usuario:', user.profile.displayName);
-      console.log('Objeto de sesión:', req.session); // Línea de depuración
-
-      // Ahora redirigimos al frontend
-      return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+      
+      // ESTE ES EL PASO CLAVE
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error al guardar la sesión:', err);
+          return next(err);
+        }
+        
+        console.log('Sesión guardada. Redirigiendo al dashboard.');
+        // AHORA SÍ redirigimos, una vez que la sesión está guardada
+        return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+      });
     });
   })(req, res, next);
 });
