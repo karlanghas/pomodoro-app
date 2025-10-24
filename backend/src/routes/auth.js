@@ -9,7 +9,7 @@ router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // Successful authentication, redirect to frontend
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3101'}/auth/success`);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3101'}/dashboard`);
   }
 );
 
