@@ -25,12 +25,14 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  proxy: true, // <-- ¡MUY IMPORTANTE! Confía en el proxy (Nginx)
+  proxy: true, // Confía en el proxy inverso (Nginx)
   cookie: {
-    secure: true, // <-- ¡MUY IMPORTANTE! Solo envía la cookie por HTTPS
-    httpOnly: true, // <-- Buena práctica. La cookie no es accesible via JS.
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // <-- Buena práctica para la mayoría de los casos
+    domain: 'pomodoro.infociber.cl', // <-- ¡CLAVE! Define explícitamente el dominio
+    path: '/', // La cookie es válida para todo el sitio
+    secure: true, // Solo por HTTPS
+    httpOnly: true, // No accesible por JavaScript
+    sameSite: 'none', // <-- ¡CAMBIO IMPORTANTE! Requerido para cross-site con proxy
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
 
