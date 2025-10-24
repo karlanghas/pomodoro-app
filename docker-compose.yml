@@ -9,9 +9,11 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - PORT=3000
-      - FRONTEND_URL=http://localhost:3101
-      - BACKEND_URL=http://localhost:3100
+      - PORT=3100
+      # URL pública para el redirect de Google OAuth
+      - FRONTEND_URL=http://pomodoro.infociber.cl:3101
+      # URL interna para comunicación entre contenedores
+      - BACKEND_URL=http://backend:3100
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - SESSION_SECRET=${SESSION_SECRET}
@@ -39,6 +41,3 @@ services:
 networks:
   pomodoro-network:
     driver: bridge
-
-volumes:
-  backend-data:
