@@ -9,7 +9,7 @@ const Dashboard = ({ user }) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Typography variant="h4" gutterBottom>
-        Bienvenido, {user?.displayName || 'Cargando...'}
+        Bienvenido, {user.profile.displayName}
       </Typography>
       
       <Grid container spacing={3}>

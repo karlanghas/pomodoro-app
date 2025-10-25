@@ -13,20 +13,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  AppBar,
-  Toolbar,
+  DialogActions
 } from '@mui/material';
-import { ArrowBack as ArrowBackIcon, Event as EventIcon, Sync as SyncIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import apiRequest from '../services/api';
+import { Event as EventIcon, Sync as SyncIcon } from '@mui/icons-material';
 
 const CalendarIntegration = ({ user }) => {
-  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [calendarId, setCalendarId] = useState(localStorage.getItem('studyCalendarId') || 'primary');
+  const [calendarId, setCalendarId] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
@@ -37,14 +32,20 @@ const CalendarIntegration = ({ user }) => {
     setLoading(true);
     setError('');
     
-    // La petición ahora incluye el calendarId como parámetro de consulta
-    apiRequest(`/calendar/study-events?calendarId=${calendarId}`)
-      .then(data => setEvents(data))
+    fetch('/api/calendar/study-events', { credentials: 'include' })
+      .then(res => {
+        if (!res.ok) throw new Error('Error al obtener eventos');
+        return res.json();
+      })
+      .then(data => {
+        setEvents(data);
+        setLoading(false);
+      })
       .catch(err => {
         console.error('Error fetching calendar events:', err);
         setError('Error al obtener eventos del calendario');
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+      });
   };
 
   const handleOpenDialog = () => {
@@ -56,9 +57,10 @@ const CalendarIntegration = ({ user }) => {
   };
 
   const handleSaveCalendarId = () => {
-    localStorage.setItem('studyCalendarId', calendarId);
+    // In a real app, this would save the calendar ID to the user's profile
+    // For simplicity, we'll just use it for this session
     setOpenDialog(false);
-    fetchEvents(); // Sincronizar después de guardar
+    fetchEvents();
   };
 
   const formatDate = (dateString) => {
@@ -68,18 +70,7 @@ const CalendarIntegration = ({ user }) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <AppBar position="static" color="primary" enableColorOnDark>
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Integración con Google Calendar
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4">Integración con Google Calendar</Typography>
           <Box>
@@ -153,7 +144,7 @@ const CalendarIntegration = ({ user }) => {
             variant="outlined"
             value={calendarId}
             onChange={(e) => setCalendarId(e.target.value)}
-            helperText="Deja en 'primary' para usar el calendario principal o pega el ID de un calendario específico."
+            helperText="Deja en blanco para usar el calendario principal"
           />
         </DialogContent>
         <DialogActions>

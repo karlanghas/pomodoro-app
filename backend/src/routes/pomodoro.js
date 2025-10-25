@@ -32,14 +32,13 @@ router.post('/start', (req, res) => {
 
 // Pause a Pomodoro session
 router.post('/pause', (req, res) => {
-  // En una app real, esto buscaría la sesión activa en la DB y la pausaría
-  // Para simplificar, devolvemos la sesión actual pero inactiva
+  // In a real app, this would update the database
   res.json({
     success: true,
     session: {
       isActive: false,
       isBreak: false,
-      timeRemaining: 25 * 60, // TODO: En una app real, esto debería mantener el tiempo restante actual
+      timeRemaining: 25 * 60,
       currentTask: null
     }
   });

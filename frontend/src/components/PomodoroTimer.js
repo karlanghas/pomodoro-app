@@ -22,11 +22,8 @@ import {
   Assignment as TaskIcon
 } from '@mui/icons-material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 
 const PomodoroTimer = ({ user }) => {
-  const navigate = useNavigate();
   const [session, setSession] = useState({
     isActive: false,
     isBreak: false,
@@ -124,7 +121,6 @@ const PomodoroTimer = ({ user }) => {
   };
 
   const handlePause = () => {
-    // Solo pausa la sesión, no la resetea
     fetch('/api/pomodoro/pause', {
       method: 'POST',
       credentials: 'include'
@@ -189,18 +185,7 @@ const PomodoroTimer = ({ user }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <AppBar position="static" color="primary" enableColorOnDark>
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Temporizador Pomodoro
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 500, mt: 2, mb: 3 }}>
+      <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 500, mb: 3 }}>
         <Typography variant="h4" align="center" gutterBottom>
           {session.isBreak ? 'Descanso' : 'Tiempo de Concentración'}
         </Typography>
