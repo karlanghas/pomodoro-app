@@ -14,11 +14,9 @@ router.get('/study-events', async (req, res) => {
 
     const calendar = google.calendar({ version: 'v3', auth });
     
-    // El ID del calendario ahora viene de los parámetros de consulta
-    const calendarId = req.query.calendarId || 'primary';
-    
+    // Get events from the specified calendar
     const response = await calendar.events.list({
-      calendarId: calendarId,
+      calendarId: process.env.STUDY_CALENDAR_ID || 'primary',
       timeMin: new Date().toISOString(),
       maxResults: 10,
       singleEvents: true,
